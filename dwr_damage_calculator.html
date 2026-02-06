@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Warrior Randomizer Damage Calculator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            font-family: 'Press Start 2P', monospace;
+            padding: 20px;
+            color: #fff;
+            overflow-x: auto;
+        }
+        
+        .container {
+            background: #0038a8;
+            border: 8px solid #fff;
+            box-shadow: 
+                0 0 0 2px #000,
+                inset 0 0 0 2px #000,
+                0 8px 20px rgba(0,0,0,0.8);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(180deg, #ff4444 0%, #cc0000 100%);
+            border-bottom: 4px solid #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #fff;
+            font-size: 16px;
+            text-shadow: 
+                3px 3px 0 #000,
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #ffff00;
+            font-size: 9px;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .controls {
+            background: #000080;
+            padding: 20px;
+            border-bottom: 3px solid #fff;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        label {
+            color: #ffff00;
+            font-size: 10px;
+        }
+        
+        input[type="number"] {
+            width: 150px;
+            padding: 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            background: #000;
+            color: #00ff00;
+            border: 3px solid #fff;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.3);
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: inset 0 0 15px rgba(255,255,0,0.5);
+        }
+        
+        .content {
+            padding: 15px;
+            background: #0038a8;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #000;
+            border: 3px solid #fff;
+        }
+        
+        th {
+            background: linear-gradient(180deg, #ff8800 0%, #cc6600 100%);
+            color: #fff;
+            padding: 8px 4px;
+            font-size: 7px;
+            border: 2px solid #fff;
+            text-shadow: 1px 1px 0 #000;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            background: #000080;
+            color: #fff;
+            padding: 6px 4px;
+            font-size: 8px;
+            border: 1px solid #4444ff;
+            text-align: center;
+        }
+        
+        tr:nth-child(even) td {
+            background: #000060;
+        }
+        
+        tr:nth-child(even) td:first-child {
+            background: #151540;
+        }
+        
+        td:first-child {
+            background: #1a1a4d;
+            text-align: left;
+            padding-left: 8px;
+            font-weight: bold;
+            color: #ffff00;
+            border-right: 2px solid #fff;
+        }
+        
+        tr:hover td {
+            background: #0000cc !important;
+        }
+        
+        tr:hover td:first-child {
+            background: #2a2a6d !important;
+        }
+        
+        .damage-min {
+            color: #ff8888;
+        }
+        
+        .damage-avg {
+            color: #ffff00;
+        }
+        
+        .damage-max {
+            color: #00ff00;
+        }
+        
+        .damage-column {
+            font-weight: bold;
+        }
+        
+        .footer {
+            background: #000;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            font-size: 6px;
+            border-top: 3px solid #fff;
+        }
+        
+        .hits-to-kill {
+            color: #00ffff;
+        }
+        
+        .infinite {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        .favorites-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #000080;
+            border: 3px solid #fff;
+        }
+        
+        .favorites-header {
+            color: #ffff00;
+            font-size: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .favorites-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .favorite-card {
+            background: #1a1a4d;
+            border: 2px solid #ffff00;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .favorite-name {
+            grid-column: 1 / -1;
+            color: #ffff00;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .favorite-stat {
+            color: #fff;
+            font-size: 8px;
+            line-height: 1.6;
+        }
+        
+        .favorite-stat-label {
+            color: #00ffff;
+        }
+        
+        .favorite-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff0000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 3px 6px;
+            cursor: pointer;
+            font-size: 8px;
+        }
+        
+        .favorite-remove:hover {
+            background: #cc0000;
+        }
+        
+        .favorite-btn {
+            color: #ffff00;
+            cursor: pointer;
+            font-size: 10px;
+            user-select: none;
+        }
+        
+        .favorite-btn:hover {
+            color: #00ff00;
+        }
+        
+        .favorite-btn.active {
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dragon Warrior Randomizer Damage Calculator</h1>
+            <div class="subtitle">CALCULATE THY STRIKING POWER</div>
+        </div>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="attackPower">YOUR ATTACK POWER:</label>
+                <input type="number" id="attackPower" min="0" max="255" value="20" oninput="calculateDamage()">
+                
+                <label for="defensePower" style="margin-left: 30px;">YOUR DEFENSE POWER:</label>
+                <input type="number" id="defensePower" min="0" max="255" value="10" oninput="calculateDamage()">
+            </div>
+        </div>
+        
+        <div class="content">
+            <div id="favoritesSection" class="favorites-section" style="display: none;">
+                <div class="favorites-header">⭐ FAVORITE MONSTERS ⭐</div>
+                <div id="favoritesList" class="favorites-list"></div>
+            </div>
+            
+            <table id="damageTable">
+                <thead>
+                    <tr>
+                        <th>⭐</th>
+                        <th>MONSTER</th>
+                        <th>STR</th>
+                        <th>DEFENSE<br>(AGI)</th>
+                        <th>HP<br>RANGE</th>
+                        <th>YOUR DMG<br>TO ENEMY</th>
+                        <th>ENEMY DMG<br>TO YOU</th>
+                        <th>HITS TO<br>KILL MIN</th>
+                        <th>HITS TO<br>KILL MAX</th>
+                    </tr>
+                </thead>
+                <tbody id="monsterData">
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            ★ MAY THY BLADE STRIKE TRUE ★
+        </div>
+    </div>
+
+    <script>
+        // Monster data from the chart
+        const monsters = [
+            {name: "Slime", strength: 5, defense: 3, hpMin: 2, hpMax: 2},
+            {name: "Red Slime", strength: 7, defense: 3, hpMin: 3, hpMax: 3},
+            {name: "Drakee", strength: 9, defense: 6, hpMin: 4, hpMax: 5},
+            {name: "Ghost", strength: 11, defense: 8, hpMin: 6, hpMax: 7},
+            {name: "Magician", strength: 11, defense: 12, hpMin: 9, hpMax: 12},
+            {name: "Magidrakee", strength: 14, defense: 14, hpMin: 10, hpMax: 13},
+            {name: "Scorpion", strength: 18, defense: 16, hpMin: 10, hpMax: 13},
+            {name: "Druin", strength: 20, defense: 18, hpMin: 17, hpMax: 22},
+            {name: "Poltergeist", strength: 18, defense: 20, hpMin: 18, hpMax: 23},
+            {name: "Droll", strength: 24, defense: 24, hpMin: 15, hpMax: 20},
+            {name: "Drakeema", strength: 22, defense: 26, hpMin: 12, hpMax: 16},
+            {name: "Skeleton", strength: 28, defense: 22, hpMin: 18, hpMax: 24},
+            {name: "Warlock", strength: 28, defense: 22, hpMin: 21, hpMax: 28},
+            {name: "Metal Scorpion", strength: 36, defense: 42, hpMin: 14, hpMax: 18},
+            {name: "Wolf", strength: 40, defense: 30, hpMin: 25, hpMax: 33},
+            {name: "Wraith", strength: 44, defense: 34, hpMin: 30, hpMax: 39},
+            {name: "Metal Slime", strength: 10, defense: 255, hpMin: 3, hpMax: 3},
+            {name: "Specter", strength: 40, defense: 38, hpMin: 25, hpMax: 33},
+            {name: "Wolflord", strength: 50, defense: 36, hpMin: 28, hpMax: 37},
+            {name: "Druinlord", strength: 47, defense: 40, hpMin: 27, hpMax: 35},
+            {name: "Drollmagi", strength: 52, defense: 50, hpMin: 33, hpMax: 44},
+            {name: "Wyvern", strength: 56, defense: 48, hpMin: 28, hpMax: 37},
+            {name: "Rogue Scorpion", strength: 60, defense: 90, hpMin: 30, hpMax: 40},
+            {name: "Wraith Knight", strength: 68, defense: 56, hpMin: 30, hpMax: 40},
+            {name: "Golem", strength: 120, defense: 60, hpMin: 115, hpMax: 153},
+            {name: "Goldman", strength: 48, defense: 40, hpMin: 27, hpMax: 35},
+            {name: "Knight", strength: 76, defense: 78, hpMin: 36, hpMax: 47},
+            {name: "Magiwyvern", strength: 78, defense: 68, hpMin: 36, hpMax: 48},
+            {name: "Demon Knight", strength: 79, defense: 64, hpMin: 29, hpMax: 38},
+            {name: "Werewolf", strength: 86, defense: 70, hpMin: 53, hpMax: 70},
+            {name: "Green Dragon", strength: 88, defense: 74, hpMin: 54, hpMax: 72},
+            {name: "Starwyvern", strength: 86, defense: 80, hpMin: 56, hpMax: 74},
+            {name: "Wizard", strength: 80, defense: 70, hpMin: 49, hpMax: 65},
+            {name: "Axe Knight", strength: 94, defense: 82, hpMin: 51, hpMax: 67},
+            {name: "Blue Dragon", strength: 98, defense: 84, hpMin: 74, hpMax: 98},
+            {name: "Stoneman", strength: 100, defense: 40, hpMin: 102, hpMax: 135},
+            {name: "Armored Knight", strength: 105, defense: 86, hpMin: 75, hpMax: 98},
+            {name: "Red Dragon", strength: 120, defense: 90, hpMin: 80, hpMax: 106},
+            {name: "Dragonlord 1", strength: 90, defense: 75, hpMin: 75, hpMax: 100},
+            {name: "Dragonlord 2", strength: 140, defense: 200, hpMin: 150, hpMax: 165}
+        ];
+
+        function calculateDamageForMonster(attack, defense) {
+            const baseDamage = attack - (defense / 2);
+            
+            if (baseDamage >= 2) {
+                // Formula: [(Attack - Defense/2) × Random(102, 153) ÷ 4] ÷ 64
+                const minRandom = 102;
+                const maxRandom = 153;
+                
+                const minDamage = Math.floor(((baseDamage * minRandom) / 4) / 64);
+                const maxDamage = Math.floor(((baseDamage * maxRandom) / 4) / 64);
+                const avgDamage = Math.floor(((baseDamage * ((minRandom + maxRandom) / 2)) / 4) / 64);
+                
+                return {
+                    min: Math.max(0, minDamage),
+                    avg: Math.max(0, avgDamage),
+                    max: Math.max(0, maxDamage)
+                };
+            } else {
+                // Random(0, 1) damage
+                return {
+                    min: 0,
+                    avg: 0.5,
+                    max: 1
+                };
+            }
+        }
+
+        function calculateEnemyDamageToPlayer(enemyStrength, playerDefense) {
+            if (playerDefense >= enemyStrength) {
+                // Defense-breaking formula: (EnemySTR + 4) / 6
+                const maxDamage = Math.floor((enemyStrength + 4) / 6);
+                return {
+                    min: 0,
+                    max: maxDamage
+                };
+            } else {
+                // Normal formula
+                const baseDamage = enemyStrength - (playerDefense / 2);
+                const minDamage = Math.floor(baseDamage / 4);
+                const maxDamage = Math.floor(baseDamage / 2);
+                return {
+                    min: minDamage,
+                    max: maxDamage
+                };
+            }
+        }
+
+        // Favorites management
+        let favorites = new Set();
+
+        function toggleFavorite(monsterName) {
+            if (favorites.has(monsterName)) {
+                favorites.delete(monsterName);
+            } else {
+                favorites.add(monsterName);
+            }
+            updateFavoritesDisplay();
+            calculateDamage(); // Refresh table to update star states
+        }
+
+        function updateFavoritesDisplay() {
+            const favSection = document.getElementById('favoritesSection');
+            const favList = document.getElementById('favoritesList');
+            
+            if (favorites.size === 0) {
+                favSection.style.display = 'none';
+                return;
+            }
+            
+            favSection.style.display = 'block';
+            favList.innerHTML = '';
+            
+            const attack = parseInt(document.getElementById('attackPower').value) || 0;
+            const defense = parseInt(document.getElementById('defensePower').value) || 0;
+            
+            favorites.forEach(favName => {
+                const monster = monsters.find(m => m.name === favName);
+                if (!monster) return;
+                
+                const playerDamage = calculateDamageForMonster(attack, monster.defense);
+                const enemyDamage = calculateEnemyDamageToPlayer(monster.strength, defense);
+                const hpRange = monster.hpMin === monster.hpMax ? 
+                    monster.hpMin : 
+                    `${monster.hpMin}-${monster.hpMax}`;
+                const hitsMin = playerDamage.max > 0 ? Math.ceil(monster.hpMin / playerDamage.max) : 'INF';
+                const hitsMax = playerDamage.min > 0 ? Math.ceil(monster.hpMax / playerDamage.min) : 'INF';
+                
+                const minClass = hitsMin === 'INF' ? 'infinite' : 'hits-to-kill';
+                const maxClass = hitsMax === 'INF' ? 'infinite' : 'hits-to-kill';
+                
+                const card = document.createElement('div');
+                card.className = 'favorite-card';
+                card.innerHTML = `
+                    <button class="favorite-remove" onclick="toggleFavorite('${monster.name}')">✕</button>
+                    <div class="favorite-name">${monster.name}</div>
+                    <div class="favorite-stat">
+                        <span class="favorite-stat-label">STR:</span> ${monster.strength}<br>
+                        <span class="favorite-stat-label">DEF:</span> ${monster.defense}<br>
+                        <span class="favorite-stat-label">HP:</span> ${hpRange}
+                    </div>
+                    <div class="favorite-stat">
+                        <span class="favorite-stat-label">YOUR DMG:</span> <span class="damage-min">${playerDamage.min}</span>-<span class="damage-max">${playerDamage.max}</span><br>
+                        <span class="favorite-stat-label">ENEMY DMG:</span> <span class="damage-min">${enemyDamage.min}</span>-<span class="damage-max">${enemyDamage.max}</span>
+                    </div>
+                    <div class="favorite-stat">
+                        <span class="favorite-stat-label">HITS TO KILL:</span><br>
+                        Min: <span class="${minClass}">${hitsMin}</span><br>
+                        Max: <span class="${maxClass}">${hitsMax}</span>
+                    </div>
+                `;
+                favList.appendChild(card);
+            });
+        }
+
+        function calculateDamage() {
+            const attack = parseInt(document.getElementById('attackPower').value) || 0;
+            const defense = parseInt(document.getElementById('defensePower').value) || 0;
+            const tbody = document.getElementById('monsterData');
+            tbody.innerHTML = '';
+            
+            monsters.forEach(monster => {
+                const playerDamage = calculateDamageForMonster(attack, monster.defense);
+                const enemyDamage = calculateEnemyDamageToPlayer(monster.strength, defense);
+                
+                const hpRange = monster.hpMin === monster.hpMax ? 
+                    monster.hpMin : 
+                    `${monster.hpMin}-${monster.hpMax}`;
+                
+                // Calculate hits to kill
+                // Min hits = fewest swings needed (max damage vs min HP)
+                // Max hits = most swings needed (min damage vs max HP)
+                const hitsToKillMin = playerDamage.max > 0 ? Math.ceil(monster.hpMin / playerDamage.max) : 'INF';
+                const hitsToKillMax = playerDamage.min > 0 ? Math.ceil(monster.hpMax / playerDamage.min) : 'INF';
+                
+                const isFavorite = favorites.has(monster.name);
+                const starClass = isFavorite ? 'favorite-btn active' : 'favorite-btn';
+                
+                const row = document.createElement('tr');
+                const minClass = hitsToKillMin === 'INF' ? 'infinite' : 'hits-to-kill';
+                const maxClass = hitsToKillMax === 'INF' ? 'infinite' : 'hits-to-kill';
+                
+                row.innerHTML = `
+                    <td style="text-align: center;"><span class="${starClass}" onclick="toggleFavorite('${monster.name}')">${isFavorite ? '★' : '☆'}</span></td>
+                    <td>${monster.name}</td>
+                    <td>${monster.strength}</td>
+                    <td>${monster.defense}</td>
+                    <td>${hpRange}</td>
+                    <td class="damage-column"><span class="damage-min">${playerDamage.min}</span>-<span class="damage-max">${playerDamage.max}</span></td>
+                    <td class="damage-column"><span class="damage-min">${enemyDamage.min}</span>-<span class="damage-max">${enemyDamage.max}</span></td>
+                    <td class="${minClass}">${hitsToKillMin}</td>
+                    <td class="${maxClass}">${hitsToKillMax}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            updateFavoritesDisplay();
+        }
+
+        // Initialize on load
+        calculateDamage();
+    </script>
+</body>
+</html>
