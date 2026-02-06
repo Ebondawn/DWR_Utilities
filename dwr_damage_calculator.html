@@ -185,6 +185,18 @@
             font-weight: bold;
         }
         
+        .monster-name-broken {
+            color: #00ff00 !important;
+        }
+        
+        .monster-name-tough {
+            color: #ffff00 !important;
+        }
+        
+        .monster-name-incredibly-tough {
+            color: #ff0000 !important;
+        }
+        
         .favorites-section {
             margin-bottom: 20px;
             padding: 15px;
@@ -218,7 +230,7 @@
         
         .favorite-name {
             grid-column: 1 / -1;
-            color: #ffff00;
+            color: #fff;
             font-size: 12px;
             font-weight: bold;
             margin-bottom: 8px;
@@ -265,6 +277,44 @@
         .favorite-btn.active {
             color: #00ff00;
         }
+        
+        .legend-section {
+            background: #000060;
+            border-top: 3px solid #fff;
+            border-bottom: 3px solid #fff;
+            padding: 15px;
+        }
+        
+        .legend-title {
+            color: #ffff00;
+            font-size: 9px;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .legend-items {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 7px;
+            color: #fff;
+        }
+        
+        .legend-color {
+            font-size: 14px;
+        }
+        
+        .legend-text {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -281,6 +331,28 @@
                 
                 <label for="defensePower" style="margin-left: 30px;">YOUR DEFENSE POWER:</label>
                 <input type="number" id="defensePower" min="0" max="255" value="10" oninput="calculateDamage()">
+            </div>
+        </div>
+        
+        <div class="legend-section">
+            <div class="legend-title">MONSTER DIFFICULTY LEGEND</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-color monster-name-incredibly-tough">■</span>
+                    <span class="legend-text">Incredibly Tough (INF hits to kill)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color monster-name-tough">■</span>
+                    <span class="legend-text">Tough (4+ hits to kill)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="color: #fff;">■</span>
+                    <span class="legend-text">Normal</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color monster-name-broken">■</span>
+                    <span class="legend-text">Damage Broken (Safe)</span>
+                </div>
             </div>
         </div>
         
@@ -368,7 +440,7 @@
             
             return {
                 min: Math.max(0, minDamage),
-                max: Math.max(0, maxDamage)
+                max: Math.max(1, maxDamage)  // Max damage is never less than 1
             };
         }
 
@@ -435,11 +507,25 @@
                 const minClass = hitsMin === 'INF' ? 'infinite' : 'hits-to-kill';
                 const maxClass = hitsMax === 'INF' ? 'infinite' : 'hits-to-kill';
                 
+                // Determine monster name color (priority: red > green > yellow > white)
+                const isDamageBroken = defense >= monster.strength;
+                const isIncrediblyTough = (hitsMin === 'INF' || hitsMax === 'INF') && monster.name !== 'Metal Slime';
+                const isTough = (typeof hitsMin === 'number' && hitsMin >= 4);
+                
+                let monsterNameClass = 'favorite-name';
+                if (isIncrediblyTough) {
+                    monsterNameClass += ' monster-name-incredibly-tough';
+                } else if (isTough) {
+                    monsterNameClass += ' monster-name-tough';
+                } else if (isDamageBroken) {
+                    monsterNameClass += ' monster-name-broken';
+                }
+                
                 const card = document.createElement('div');
                 card.className = 'favorite-card';
                 card.innerHTML = `
                     <button class="favorite-remove" onclick="toggleFavorite('${monster.name}')">✕</button>
-                    <div class="favorite-name">${monster.name}</div>
+                    <div class="${monsterNameClass}">${monster.name}</div>
                     <div class="favorite-stat">
                         <span class="favorite-stat-label">STR:</span> ${monster.strength}<br>
                         <span class="favorite-stat-label">DEF:</span> ${monster.defense}<br>
@@ -482,13 +568,27 @@
                 const isFavorite = favorites.has(monster.name);
                 const starClass = isFavorite ? 'favorite-btn active' : 'favorite-btn';
                 
+                // Determine monster name color (priority: red > yellow > green > white)
+                const isDamageBroken = defense >= monster.strength;
+                const isIncrediblyTough = (hitsToKillMin === 'INF' || hitsToKillMax === 'INF') && monster.name !== 'Metal Slime';
+                const isTough = (typeof hitsToKillMin === 'number' && hitsToKillMin >= 4);
+                
+                let monsterNameClass = '';
+                if (isIncrediblyTough) {
+                    monsterNameClass = 'monster-name-incredibly-tough';
+                } else if (isTough) {
+                    monsterNameClass = 'monster-name-tough';
+                } else if (isDamageBroken) {
+                    monsterNameClass = 'monster-name-broken';
+                }
+                
                 const row = document.createElement('tr');
                 const minClass = hitsToKillMin === 'INF' ? 'infinite' : 'hits-to-kill';
                 const maxClass = hitsToKillMax === 'INF' ? 'infinite' : 'hits-to-kill';
                 
                 row.innerHTML = `
                     <td style="text-align: center;"><span class="${starClass}" onclick="toggleFavorite('${monster.name}')">${isFavorite ? '★' : '☆'}</span></td>
-                    <td>${monster.name}</td>
+                    <td class="${monsterNameClass}">${monster.name}</td>
                     <td>${monster.strength}</td>
                     <td>${monster.defense}</td>
                     <td>${hpRange}</td>
