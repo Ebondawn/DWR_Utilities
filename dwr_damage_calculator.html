@@ -362,28 +362,14 @@
         function calculateDamageForMonster(attack, defense) {
             const baseDamage = attack - (defense / 2);
             
-            if (baseDamage >= 2) {
-                // Formula: [(Attack - Defense/2) × Random(102, 153) ÷ 4] ÷ 64
-                const minRandom = 102;
-                const maxRandom = 153;
-                
-                const minDamage = Math.floor(((baseDamage * minRandom) / 4) / 64);
-                const maxDamage = Math.floor(((baseDamage * maxRandom) / 4) / 64);
-                const avgDamage = Math.floor(((baseDamage * ((minRandom + maxRandom) / 2)) / 4) / 64);
-                
-                return {
-                    min: Math.max(0, minDamage),
-                    avg: Math.max(0, avgDamage),
-                    max: Math.max(0, maxDamage)
-                };
-            } else {
-                // Random(0, 1) damage
-                return {
-                    min: 0,
-                    avg: 0.5,
-                    max: 1
-                };
-            }
+            // Formula: (Attack - Defense/2) / 4 for min, / 2 for max
+            const minDamage = Math.floor(baseDamage / 4);
+            const maxDamage = Math.floor(baseDamage / 2);
+            
+            return {
+                min: Math.max(0, minDamage),
+                max: Math.max(0, maxDamage)
+            };
         }
 
         function calculateEnemyDamageToPlayer(enemyStrength, playerDefense) {
